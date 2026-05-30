@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_ToBe_OrderProcessing" targetNamespace="http://example.com/bpmn/to-be-order-processing" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="18.13.2">
+  <bpmn:process id="Process_ToBe_OrderProcessing" name="TO-BE: обработка заказа на услуги" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_ToBe_OrderProcessing">
+      <bpmn:lane id="Lane_Performer" name="Исполнитель">
+        <bpmn:flowNodeRef>Task_Performer_ExecuteTaskBySpecification</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Performer_RecordFactAndResult</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1r7n81p</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Performer_ReworkByComments</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Manager" name="Менеджер">
+        <bpmn:flowNodeRef>Task_Manager_AdjustExceptions</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Manager_ReviewDraftAndExceptions</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_1wwqy3d</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Manager_CheckResultByChecklist</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Manager_CloseOrder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ServiceListCorrect</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_End</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_ResultAccepted</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_System" name="BPM-система с ИИ-агентом">
+        <bpmn:flowNodeRef>Task_System_CreateDraftServiceList</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_System_AutoCreateSubtasks</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_System_InsertSpecificationTemplates</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_System_AssignPerformersByRules</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_System_MonitorSlaAndStatuses</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_System_CheckRequiredFields</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_System_MatchServicesFromCatalog</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_System_UpdatePlanFact</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_DataComplete</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Customer" name="Заказчик">
+        <bpmn:flowNodeRef>Gateway_153y4gi</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Customer_FillStructuredOrderForm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Customer_ClarifyRequestData</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Customer_ConfirmServiceList</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>StartEvent_Start</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_Start" name="Старт">
+      <bpmn:outgoing>Flow_Start_To_CustomerFillStructuredOrderForm</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Task_Customer_FillStructuredOrderForm" name="Заказчик заполняет структурированную форму заказа с типовыми услугами">
+      <bpmn:incoming>Flow_Start_To_CustomerFillStructuredOrderForm</bpmn:incoming>
+      <bpmn:outgoing>Flow_CustomerFillStructuredOrderForm_To_SystemCheckRequiredFields</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_System_CheckRequiredFields" name="Проверить поля по правилам">
+      <bpmn:incoming>Flow_1vya366</bpmn:incoming>
+      <bpmn:outgoing>Flow_0fo6e1i</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_DataComplete" name="Данные полные, услуги подобраны?" default="Flow_0ba6e4k">
+      <bpmn:incoming>Flow_SystemMatchServicesFromCatalog_To_SystemCreateDraftServiceList</bpmn:incoming>
+      <bpmn:outgoing>Flow_DataComplete_No_To_CustomerClarifyRequestData</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0ba6e4k</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Customer_ClarifyRequestData" name="Уточнить данные заявки">
+      <bpmn:incoming>Flow_DataComplete_No_To_CustomerClarifyRequestData</bpmn:incoming>
+      <bpmn:outgoing>Flow_CustomerClarifyRequestData_To_SystemCheckRequiredFields</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:businessRuleTask id="Task_System_MatchServicesFromCatalog" name="Подобрать услуги из каталога">
+      <bpmn:incoming>Flow_0fo6e1i</bpmn:incoming>
+      <bpmn:outgoing>Flow_SystemMatchServicesFromCatalog_To_SystemCreateDraftServiceList</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:serviceTask id="Task_System_CreateDraftServiceList" name="Сформировать черновик перечня услуг">
+      <bpmn:incoming>Flow_0ba6e4k</bpmn:incoming>
+      <bpmn:outgoing>Flow_0lv0i5w</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Task_Manager_ReviewDraftAndExceptions" name="Проверить черновик и исключения">
+      <bpmn:incoming>Flow_SystemCreateDraftServiceList_To_ManagerReviewDraftAndExceptions</bpmn:incoming>
+      <bpmn:outgoing>Flow_ManagerReviewDraftAndExceptions_To_ServiceListCorrect</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_ServiceListCorrect" name="Перечень корректен?" default="Flow_ServiceListCorrect_Yes_To_CustomerConfirmServiceList">
+      <bpmn:incoming>Flow_ManagerReviewDraftAndExceptions_To_ServiceListCorrect</bpmn:incoming>
+      <bpmn:outgoing>Flow_ServiceListCorrect_No_To_ManagerAdjustExceptions</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ServiceListCorrect_Yes_To_CustomerConfirmServiceList</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Manager_AdjustExceptions" name="Скорректировать перечень услуг">
+      <bpmn:incoming>Flow_ServiceListCorrect_No_To_ManagerAdjustExceptions</bpmn:incoming>
+      <bpmn:outgoing>Flow_ManagerAdjustExceptions_To_SystemCreateDraftServiceList</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Customer_ConfirmServiceList" name="Подтвердить сформированный  перечень услу">
+      <bpmn:incoming>Flow_ServiceListCorrect_Yes_To_CustomerConfirmServiceList</bpmn:incoming>
+      <bpmn:outgoing>Flow_CustomerConfirmServiceList_To_SystemAutoCreateSubtasks</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_System_AutoCreateSubtasks" name="Сформировать подзадачи">
+      <bpmn:incoming>Flow_CustomerConfirmServiceList_To_SystemAutoCreateSubtasks</bpmn:incoming>
+      <bpmn:outgoing>Flow_SystemAutoCreateSubtasks_To_SystemInsertSpecificationTemplates</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_System_InsertSpecificationTemplates" name="Заполнить шаблоны ТЗ">
+      <bpmn:incoming>Flow_SystemAutoCreateSubtasks_To_SystemInsertSpecificationTemplates</bpmn:incoming>
+      <bpmn:outgoing>Flow_SystemInsertSpecificationTemplates_To_SystemAssignPerformersByRules</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:businessRuleTask id="Task_System_AssignPerformersByRules" name="Назначить исполнителей по правилам">
+      <bpmn:incoming>Flow_SystemInsertSpecificationTemplates_To_SystemAssignPerformersByRules</bpmn:incoming>
+      <bpmn:outgoing>Flow_SystemAssignPerformersByRules_To_PerformerExecuteTaskBySpecification</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:userTask id="Task_Performer_ExecuteTaskBySpecification" name="Выполнить подзадачи по ТЗ">
+      <bpmn:incoming>Flow_SystemAssignPerformersByRules_To_PerformerExecuteTaskBySpecification</bpmn:incoming>
+      <bpmn:outgoing>Flow_PerformerExecuteTaskBySpecification_To_PerformerRecordFactAndResult</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Performer_RecordFactAndResult" name="Зафиксировать факт и результат">
+      <bpmn:incoming>Flow_17a8nae</bpmn:incoming>
+      <bpmn:outgoing>Flow_PerformerRecordFactAndResult_To_SystemMonitorSlaAndStatuses</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Task_System_MonitorSlaAndStatuses" name="Контролировать SLA и статусы">
+      <bpmn:incoming>Flow_PerformerRecordFactAndResult_To_SystemMonitorSlaAndStatuses</bpmn:incoming>
+      <bpmn:outgoing>Flow_SystemMonitorSlaAndStatuses_To_ManagerCheckResultByChecklist</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Task_Manager_CheckResultByChecklist" name="Проверить результат по чек-листу">
+      <bpmn:incoming>Flow_SystemMonitorSlaAndStatuses_To_ManagerCheckResultByChecklist</bpmn:incoming>
+      <bpmn:outgoing>Flow_ManagerCheckResultByChecklist_To_ResultAccepted</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_ResultAccepted" name="Результат принят?" default="Flow_ResultAccepted_Yes_To_SystemUpdatePlanFact">
+      <bpmn:incoming>Flow_ManagerCheckResultByChecklist_To_ResultAccepted</bpmn:incoming>
+      <bpmn:outgoing>Flow_ResultAccepted_Yes_To_SystemUpdatePlanFact</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ResultAccepted_No_To_ManagerStartControlledRework</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_System_UpdatePlanFact" name="Обновить данные о заказе">
+      <bpmn:incoming>Flow_ResultAccepted_Yes_To_SystemUpdatePlanFact</bpmn:incoming>
+      <bpmn:outgoing>Flow_SystemUpdatePlanFact_To_ManagerCloseOrder</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Task_Manager_CloseOrder" name="Закрыть заказ">
+      <bpmn:incoming>Flow_SystemUpdatePlanFact_To_ManagerCloseOrder</bpmn:incoming>
+      <bpmn:outgoing>Flow_ManagerCloseOrder_To_End</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Performer_ReworkByComments" name="Доработать по замечаниям">
+      <bpmn:incoming>Flow_ResultAccepted_No_To_ManagerStartControlledRework</bpmn:incoming>
+      <bpmn:outgoing>Flow_PerformerReworkByComments_To_PerformerRecordFactAndResult</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_End" name="Конец">
+      <bpmn:incoming>Flow_ManagerCloseOrder_To_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Start_To_CustomerFillStructuredOrderForm" sourceRef="StartEvent_Start" targetRef="Task_Customer_FillStructuredOrderForm" />
+    <bpmn:sequenceFlow id="Flow_CustomerFillStructuredOrderForm_To_SystemCheckRequiredFields" sourceRef="Task_Customer_FillStructuredOrderForm" targetRef="Gateway_153y4gi" />
+    <bpmn:sequenceFlow id="Flow_DataComplete_No_To_CustomerClarifyRequestData" name="Нет" sourceRef="Gateway_DataComplete" targetRef="Task_Customer_ClarifyRequestData" />
+    <bpmn:sequenceFlow id="Flow_CustomerClarifyRequestData_To_SystemCheckRequiredFields" sourceRef="Task_Customer_ClarifyRequestData" targetRef="Gateway_153y4gi" />
+    <bpmn:sequenceFlow id="Flow_SystemMatchServicesFromCatalog_To_SystemCreateDraftServiceList" sourceRef="Task_System_MatchServicesFromCatalog" targetRef="Gateway_DataComplete" />
+    <bpmn:sequenceFlow id="Flow_SystemCreateDraftServiceList_To_ManagerReviewDraftAndExceptions" sourceRef="Gateway_1wwqy3d" targetRef="Task_Manager_ReviewDraftAndExceptions" />
+    <bpmn:sequenceFlow id="Flow_ManagerReviewDraftAndExceptions_To_ServiceListCorrect" sourceRef="Task_Manager_ReviewDraftAndExceptions" targetRef="Gateway_ServiceListCorrect" />
+    <bpmn:sequenceFlow id="Flow_ServiceListCorrect_No_To_ManagerAdjustExceptions" name="Нет" sourceRef="Gateway_ServiceListCorrect" targetRef="Task_Manager_AdjustExceptions" />
+    <bpmn:sequenceFlow id="Flow_ManagerAdjustExceptions_To_SystemCreateDraftServiceList" sourceRef="Task_Manager_AdjustExceptions" targetRef="Gateway_1wwqy3d" />
+    <bpmn:sequenceFlow id="Flow_ServiceListCorrect_Yes_To_CustomerConfirmServiceList" name="Да" sourceRef="Gateway_ServiceListCorrect" targetRef="Task_Customer_ConfirmServiceList" />
+    <bpmn:sequenceFlow id="Flow_CustomerConfirmServiceList_To_SystemAutoCreateSubtasks" sourceRef="Task_Customer_ConfirmServiceList" targetRef="Task_System_AutoCreateSubtasks" />
+    <bpmn:sequenceFlow id="Flow_SystemAutoCreateSubtasks_To_SystemInsertSpecificationTemplates" sourceRef="Task_System_AutoCreateSubtasks" targetRef="Task_System_InsertSpecificationTemplates" />
+    <bpmn:sequenceFlow id="Flow_SystemInsertSpecificationTemplates_To_SystemAssignPerformersByRules" sourceRef="Task_System_InsertSpecificationTemplates" targetRef="Task_System_AssignPerformersByRules" />
+    <bpmn:sequenceFlow id="Flow_SystemAssignPerformersByRules_To_PerformerExecuteTaskBySpecification" sourceRef="Task_System_AssignPerformersByRules" targetRef="Task_Performer_ExecuteTaskBySpecification" />
+    <bpmn:sequenceFlow id="Flow_PerformerExecuteTaskBySpecification_To_PerformerRecordFactAndResult" sourceRef="Task_Performer_ExecuteTaskBySpecification" targetRef="Gateway_1r7n81p" />
+    <bpmn:sequenceFlow id="Flow_PerformerRecordFactAndResult_To_SystemMonitorSlaAndStatuses" sourceRef="Task_Performer_RecordFactAndResult" targetRef="Task_System_MonitorSlaAndStatuses" />
+    <bpmn:sequenceFlow id="Flow_SystemMonitorSlaAndStatuses_To_ManagerCheckResultByChecklist" sourceRef="Task_System_MonitorSlaAndStatuses" targetRef="Task_Manager_CheckResultByChecklist" />
+    <bpmn:sequenceFlow id="Flow_ManagerCheckResultByChecklist_To_ResultAccepted" sourceRef="Task_Manager_CheckResultByChecklist" targetRef="Gateway_ResultAccepted" />
+    <bpmn:sequenceFlow id="Flow_ResultAccepted_Yes_To_SystemUpdatePlanFact" name="Да" sourceRef="Gateway_ResultAccepted" targetRef="Task_System_UpdatePlanFact" />
+    <bpmn:sequenceFlow id="Flow_SystemUpdatePlanFact_To_ManagerCloseOrder" sourceRef="Task_System_UpdatePlanFact" targetRef="Task_Manager_CloseOrder" />
+    <bpmn:sequenceFlow id="Flow_ManagerCloseOrder_To_End" sourceRef="Task_Manager_CloseOrder" targetRef="EndEvent_End" />
+    <bpmn:sequenceFlow id="Flow_ResultAccepted_No_To_ManagerStartControlledRework" name="Нет, нужна доработка" sourceRef="Gateway_ResultAccepted" targetRef="Task_Performer_ReworkByComments" />
+    <bpmn:sequenceFlow id="Flow_PerformerReworkByComments_To_PerformerRecordFactAndResult" sourceRef="Task_Performer_ReworkByComments" targetRef="Gateway_1r7n81p" />
+    <bpmn:exclusiveGateway id="Gateway_1wwqy3d">
+      <bpmn:incoming>Flow_ManagerAdjustExceptions_To_SystemCreateDraftServiceList</bpmn:incoming>
+      <bpmn:incoming>Flow_0lv0i5w</bpmn:incoming>
+      <bpmn:outgoing>Flow_SystemCreateDraftServiceList_To_ManagerReviewDraftAndExceptions</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0lv0i5w" sourceRef="Task_System_CreateDraftServiceList" targetRef="Gateway_1wwqy3d" />
+    <bpmn:exclusiveGateway id="Gateway_153y4gi">
+      <bpmn:incoming>Flow_CustomerFillStructuredOrderForm_To_SystemCheckRequiredFields</bpmn:incoming>
+      <bpmn:incoming>Flow_CustomerClarifyRequestData_To_SystemCheckRequiredFields</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vya366</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1vya366" sourceRef="Gateway_153y4gi" targetRef="Task_System_CheckRequiredFields" />
+    <bpmn:sequenceFlow id="Flow_0fo6e1i" sourceRef="Task_System_CheckRequiredFields" targetRef="Task_System_MatchServicesFromCatalog" />
+    <bpmn:sequenceFlow id="Flow_0ba6e4k" name="Да" sourceRef="Gateway_DataComplete" targetRef="Task_System_CreateDraftServiceList" />
+    <bpmn:exclusiveGateway id="Gateway_1r7n81p">
+      <bpmn:incoming>Flow_PerformerExecuteTaskBySpecification_To_PerformerRecordFactAndResult</bpmn:incoming>
+      <bpmn:incoming>Flow_PerformerReworkByComments_To_PerformerRecordFactAndResult</bpmn:incoming>
+      <bpmn:outgoing>Flow_17a8nae</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_17a8nae" sourceRef="Gateway_1r7n81p" targetRef="Task_Performer_RecordFactAndResult" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ToBe_OrderProcessing">
+    <bpmndi:BPMNPlane id="BPMNPlane_ToBe_OrderProcessing" bpmnElement="Process_ToBe_OrderProcessing">
+      <bpmndi:BPMNShape id="Lane_Performer_di" bpmnElement="Lane_Performer" isHorizontal="true">
+        <dc:Bounds x="160" y="540" width="3860" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Manager_di" bpmnElement="Lane_Manager" isHorizontal="true">
+        <dc:Bounds x="160" y="340" width="3860" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_System_di" bpmnElement="Lane_System" isHorizontal="true">
+        <dc:Bounds x="160" y="180" width="3860" height="160" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Customer_di" bpmnElement="Lane_Customer" isHorizontal="true">
+        <dc:Bounds x="160" y="40" width="3860" height="140" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_Start_di" bpmnElement="StartEvent_Start">
+        <dc:Bounds x="210" y="92" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="213" y="128" width="30" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_System_CreateDraftServiceList_di" bpmnElement="Task_System_CreateDraftServiceList">
+        <dc:Bounds x="1110" y="220" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Manager_AdjustExceptions_di" bpmnElement="Task_Manager_AdjustExceptions">
+        <dc:Bounds x="1550" y="470" width="180" height="60" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_System_AutoCreateSubtasks_di" bpmnElement="Task_System_AutoCreateSubtasks">
+        <dc:Bounds x="1980" y="220" width="180" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_System_InsertSpecificationTemplates_di" bpmnElement="Task_System_InsertSpecificationTemplates">
+        <dc:Bounds x="2230" y="220" width="170" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_System_AssignPerformersByRules_di" bpmnElement="Task_System_AssignPerformersByRules">
+        <dc:Bounds x="2470" y="220" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Manager_ReviewDraftAndExceptions_di" bpmnElement="Task_Manager_ReviewDraftAndExceptions">
+        <dc:Bounds x="1360" y="360" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_System_MonitorSlaAndStatuses_di" bpmnElement="Task_System_MonitorSlaAndStatuses">
+        <dc:Bounds x="2900" y="220" width="180" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ServiceListCorrect_di" bpmnElement="Gateway_ServiceListCorrect" isMarkerVisible="true">
+        <dc:Bounds x="1610" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1606" y="346" width="58" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1wwqy3d_di" bpmnElement="Gateway_1wwqy3d" isMarkerVisible="true">
+        <dc:Bounds x="1180" y="375" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_System_CheckRequiredFields_di" bpmnElement="Task_System_CheckRequiredFields">
+        <dc:Bounds x="500" y="220" width="160" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_153y4gi_di" bpmnElement="Gateway_153y4gi" isMarkerVisible="true">
+        <dc:Bounds x="555" y="85" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Customer_FillStructuredOrderForm_di" bpmnElement="Task_Customer_FillStructuredOrderForm">
+        <dc:Bounds x="305" y="70" width="190" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_System_MatchServicesFromCatalog_di" bpmnElement="Task_System_MatchServicesFromCatalog">
+        <dc:Bounds x="705" y="220" width="170" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_DataComplete_di" bpmnElement="Gateway_DataComplete" isMarkerVisible="true">
+        <dc:Bounds x="955" y="235" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="939" y="285" width="84" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Customer_ClarifyRequestData_di" bpmnElement="Task_Customer_ClarifyRequestData">
+        <dc:Bounds x="895" y="70" width="170" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Customer_ConfirmServiceList_di" bpmnElement="Task_Customer_ConfirmServiceList">
+        <dc:Bounds x="1730" y="70" width="180" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Performer_ExecuteTaskBySpecification_di" bpmnElement="Task_Performer_ExecuteTaskBySpecification">
+        <dc:Bounds x="2590" y="585" width="180" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Performer_RecordFactAndResult_di" bpmnElement="Task_Performer_RecordFactAndResult">
+        <dc:Bounds x="2900" y="585" width="180" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1r7n81p_di" bpmnElement="Gateway_1r7n81p" isMarkerVisible="true">
+        <dc:Bounds x="2810" y="600" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Manager_CheckResultByChecklist_di" bpmnElement="Task_Manager_CheckResultByChecklist">
+        <dc:Bounds x="3125" y="380" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Manager_CloseOrder_di" bpmnElement="Task_Manager_CloseOrder">
+        <dc:Bounds x="3735" y="355" width="150" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_End_di" bpmnElement="EndEvent_End">
+        <dc:Bounds x="3942" y="372" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3944" y="408" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_System_UpdatePlanFact_di" bpmnElement="Task_System_UpdatePlanFact">
+        <dc:Bounds x="3520" y="220" width="160" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_ResultAccepted_di" bpmnElement="Gateway_ResultAccepted" isMarkerVisible="true">
+        <dc:Bounds x="3425" y="395" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3485" y="406" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Performer_ReworkByComments_di" bpmnElement="Task_Performer_ReworkByComments">
+        <dc:Bounds x="3355" y="585" width="180" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_To_CustomerFillStructuredOrderForm_di" bpmnElement="Flow_Start_To_CustomerFillStructuredOrderForm">
+        <di:waypoint x="246" y="110" />
+        <di:waypoint x="305" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ba6e4k_di" bpmnElement="Flow_0ba6e4k">
+        <di:waypoint x="1005" y="260" />
+        <di:waypoint x="1110" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1051" y="242" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0lv0i5w_di" bpmnElement="Flow_0lv0i5w">
+        <di:waypoint x="1205" y="300" />
+        <di:waypoint x="1205" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ServiceListCorrect_No_To_ManagerAdjustExceptions_di" bpmnElement="Flow_ServiceListCorrect_No_To_ManagerAdjustExceptions">
+        <di:waypoint x="1635" y="425" />
+        <di:waypoint x="1635" y="470" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1641" y="433" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ManagerAdjustExceptions_To_SystemCreateDraftServiceList_di" bpmnElement="Flow_ManagerAdjustExceptions_To_SystemCreateDraftServiceList">
+        <di:waypoint x="1550" y="500" />
+        <di:waypoint x="1205" y="500" />
+        <di:waypoint x="1205" y="425" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CustomerConfirmServiceList_To_SystemAutoCreateSubtasks_di" bpmnElement="Flow_CustomerConfirmServiceList_To_SystemAutoCreateSubtasks">
+        <di:waypoint x="1910" y="110" />
+        <di:waypoint x="1950" y="110" />
+        <di:waypoint x="1950" y="260" />
+        <di:waypoint x="1980" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SystemAutoCreateSubtasks_To_SystemInsertSpecificationTemplates_di" bpmnElement="Flow_SystemAutoCreateSubtasks_To_SystemInsertSpecificationTemplates">
+        <di:waypoint x="2160" y="260" />
+        <di:waypoint x="2230" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SystemInsertSpecificationTemplates_To_SystemAssignPerformersByRules_di" bpmnElement="Flow_SystemInsertSpecificationTemplates_To_SystemAssignPerformersByRules">
+        <di:waypoint x="2400" y="260" />
+        <di:waypoint x="2470" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SystemAssignPerformersByRules_To_PerformerExecuteTaskBySpecification_di" bpmnElement="Flow_SystemAssignPerformersByRules_To_PerformerExecuteTaskBySpecification">
+        <di:waypoint x="2660" y="260" />
+        <di:waypoint x="2685" y="260" />
+        <di:waypoint x="2685" y="585" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SystemCreateDraftServiceList_To_ManagerReviewDraftAndExceptions_di" bpmnElement="Flow_SystemCreateDraftServiceList_To_ManagerReviewDraftAndExceptions">
+        <di:waypoint x="1230" y="400" />
+        <di:waypoint x="1360" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ManagerReviewDraftAndExceptions_To_ServiceListCorrect_di" bpmnElement="Flow_ManagerReviewDraftAndExceptions_To_ServiceListCorrect">
+        <di:waypoint x="1550" y="400" />
+        <di:waypoint x="1610" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PerformerRecordFactAndResult_To_SystemMonitorSlaAndStatuses_di" bpmnElement="Flow_PerformerRecordFactAndResult_To_SystemMonitorSlaAndStatuses">
+        <di:waypoint x="2990" y="585" />
+        <di:waypoint x="2990" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SystemMonitorSlaAndStatuses_To_ManagerCheckResultByChecklist_di" bpmnElement="Flow_SystemMonitorSlaAndStatuses_To_ManagerCheckResultByChecklist">
+        <di:waypoint x="3080" y="260" />
+        <di:waypoint x="3220" y="260" />
+        <di:waypoint x="3220" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ServiceListCorrect_Yes_To_CustomerConfirmServiceList_di" bpmnElement="Flow_ServiceListCorrect_Yes_To_CustomerConfirmServiceList">
+        <di:waypoint x="1660" y="400" />
+        <di:waypoint x="1700" y="400" />
+        <di:waypoint x="1700" y="110" />
+        <di:waypoint x="1730" y="110" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1708" y="245" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vya366_di" bpmnElement="Flow_1vya366">
+        <di:waypoint x="580" y="135" />
+        <di:waypoint x="580" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fo6e1i_di" bpmnElement="Flow_0fo6e1i">
+        <di:waypoint x="660" y="260" />
+        <di:waypoint x="705" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CustomerFillStructuredOrderForm_To_SystemCheckRequiredFields_di" bpmnElement="Flow_CustomerFillStructuredOrderForm_To_SystemCheckRequiredFields">
+        <di:waypoint x="495" y="110" />
+        <di:waypoint x="555" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CustomerClarifyRequestData_To_SystemCheckRequiredFields_di" bpmnElement="Flow_CustomerClarifyRequestData_To_SystemCheckRequiredFields">
+        <di:waypoint x="895" y="110" />
+        <di:waypoint x="605" y="110" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SystemMatchServicesFromCatalog_To_SystemCreateDraftServiceList_di" bpmnElement="Flow_SystemMatchServicesFromCatalog_To_SystemCreateDraftServiceList">
+        <di:waypoint x="875" y="260" />
+        <di:waypoint x="955" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_DataComplete_No_To_CustomerClarifyRequestData_di" bpmnElement="Flow_DataComplete_No_To_CustomerClarifyRequestData">
+        <di:waypoint x="980" y="235" />
+        <di:waypoint x="980" y="150" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="986" y="203" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PerformerExecuteTaskBySpecification_To_PerformerRecordFactAndResult_di" bpmnElement="Flow_PerformerExecuteTaskBySpecification_To_PerformerRecordFactAndResult">
+        <di:waypoint x="2770" y="625" />
+        <di:waypoint x="2810" y="625" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17a8nae_di" bpmnElement="Flow_17a8nae">
+        <di:waypoint x="2860" y="625" />
+        <di:waypoint x="2900" y="625" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_PerformerReworkByComments_To_PerformerRecordFactAndResult_di" bpmnElement="Flow_PerformerReworkByComments_To_PerformerRecordFactAndResult">
+        <di:waypoint x="3445" y="665" />
+        <di:waypoint x="3445" y="690" />
+        <di:waypoint x="2835" y="690" />
+        <di:waypoint x="2835" y="650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ManagerCheckResultByChecklist_To_ResultAccepted_di" bpmnElement="Flow_ManagerCheckResultByChecklist_To_ResultAccepted">
+        <di:waypoint x="3315" y="420" />
+        <di:waypoint x="3425" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SystemUpdatePlanFact_To_ManagerCloseOrder_di" bpmnElement="Flow_SystemUpdatePlanFact_To_ManagerCloseOrder">
+        <di:waypoint x="3680" y="260" />
+        <di:waypoint x="3815" y="260" />
+        <di:waypoint x="3815" y="355" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ManagerCloseOrder_To_End_di" bpmnElement="Flow_ManagerCloseOrder_To_End">
+        <di:waypoint x="3885" y="390" />
+        <di:waypoint x="3942" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ResultAccepted_Yes_To_SystemUpdatePlanFact_di" bpmnElement="Flow_ResultAccepted_Yes_To_SystemUpdatePlanFact">
+        <di:waypoint x="3450" y="395" />
+        <di:waypoint x="3450" y="260" />
+        <di:waypoint x="3520" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3458" y="318" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_ResultAccepted_No_To_ManagerStartControlledRework_di" bpmnElement="Flow_ResultAccepted_No_To_ManagerStartControlledRework">
+        <di:waypoint x="3450" y="445" />
+        <di:waypoint x="3450" y="585" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="3472" y="495" width="55" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
